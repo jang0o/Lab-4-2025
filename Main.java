@@ -123,43 +123,46 @@ public class Main {
             }
 
             // сериализация
-            System.out.println("\n9. Сериализация:");
+            System.out.println("\nСериализация:");
 
             // создаем композицию ln(exp(x)) = x
             Function composition = Functions.composition(new Log(Math.E), new Exp());
-            TabulatedFunction lnExp = TabulatedFunctions.tabulate(composition, 0, 10, 11);
 
-            System.out.println("Исходная функция ln(exp(x)) = x:");
-            for (double x = 0; x <= 10; x += 1) {
-                System.out.printf("x=%.1f: %.6f\n", x, lnExp.getFunctionValue(x));
+            System.out.println("\nСериализация");
+            LinkedListTabulatedFunction linkedListFunction = new LinkedListTabulatedFunction(0, 10, 11);
+            for (int i = 0; i < linkedListFunction.getPointsCount(); i++) {
+                double x = linkedListFunction.getPointX(i);
+                linkedListFunction.setPointY(i, composition.getFunctionValue(x));
             }
 
-            // сериализация с использованием Serializable
-            System.out.println("\nСериализация");
+            System.out.println("Исходная функция LinkedList ln(exp(x)) = x:");
+            for (double x = 0; x <= 10; x += 1) {
+                System.out.printf("x=%.1f: %.6f\n", x, linkedListFunction.getFunctionValue(x));
+            }
+
             try (FileOutputStream fos = new FileOutputStream("serializable.ser");
                  ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-                oos.writeObject(lnExp);
-                System.out.println("Функция сериализована в serializable.ser");
+                oos.writeObject(linkedListFunction);
+                System.out.println("LinkedListTabulatedFunction сериализована в serializable.ser");
             }
 
             // десериализация Serializable
-            TabulatedFunction deserializedSerializable;
+            LinkedListTabulatedFunction deserializedLinkedList;
             try (FileInputStream fis = new FileInputStream("serializable.ser");
                  ObjectInputStream ois = new ObjectInputStream(fis)) {
-                deserializedSerializable = (TabulatedFunction) ois.readObject();
+                deserializedLinkedList = (LinkedListTabulatedFunction) ois.readObject();
                 System.out.println("Функция десериализована из serializable.ser");
             }
 
             System.out.println("Сравнение после Serializable:");
             for (double x = 0; x <= 10; x += 1) {
-                double original = lnExp.getFunctionValue(x);
-                double deserialized = deserializedSerializable.getFunctionValue(x);
+                double original = linkedListFunction.getFunctionValue(x);
+                double deserialized = deserializedLinkedList.getFunctionValue(x);
                 boolean matches = Math.abs(original - deserialized) < 1e-10;
                 System.out.printf("x=%.1f: исходная=%.6f, восстановленная=%.6f, совпадают=%b\n",
                         x, original, deserialized, matches);
             }
 
-            // сериализация с использованием Externalizable
             System.out.println("\nЭкстернализация");
 
             // создаем ArrayTabulatedFunction для Externalizable
@@ -169,10 +172,15 @@ public class Main {
                 arrayFunction.setPointY(i, composition.getFunctionValue(x));
             }
 
+            System.out.println("Исходная функция Array ln(exp(x)) = x:");
+            for (double x = 0; x <= 10; x += 1) {
+                System.out.printf("x=%.1f: %.6f\n", x, arrayFunction.getFunctionValue(x));
+            }
+
             try (FileOutputStream fos = new FileOutputStream("externalizable.ser");
                  ObjectOutputStream oos = new ObjectOutputStream(fos)) {
                 arrayFunction.writeExternal(oos);
-                System.out.println("Функция сериализована в externalizable.ser");
+                System.out.println("ArrayTabulatedFunction сериализована в externalizable.ser");
             }
 
             // десериализация Externalizable
@@ -197,8 +205,8 @@ public class Main {
             File serializableFile = new File("serializable.ser");
             File externalizableFile = new File("externalizable.ser");
 
-            System.out.println("Размер файла Serializable: " + serializableFile.length() + " байт");
-            System.out.println("Размер файла Externalizable: " + externalizableFile.length() + " байт");
+            System.out.println("Размер файла Serializable (LinkedList): " + serializableFile.length() + " байт");
+            System.out.println("Размер файла Externalizable (Array): " + externalizableFile.length() + " байт");
 
         } catch (Exception e) {
             System.out.println("Произошла ошибка: " + e.getMessage());
