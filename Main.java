@@ -123,10 +123,10 @@ public class Main {
             }
 
             // сериализация
-            System.out.println("\nСериализация:");
+            System.out.println("\n  Сериализация:");
 
             // создаем композицию ln(exp(x)) = x
-            Function composition = Functions.composition(new Log(Math.E), new Exp());
+            Function composition = Functions.composition(new Exp(), new Log(Math.E));
 
             System.out.println("\nСериализация");
             LinkedListTabulatedFunction linkedListFunction = new LinkedListTabulatedFunction(0, 10, 11);
